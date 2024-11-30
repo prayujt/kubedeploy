@@ -11,7 +11,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/rest"
 )
 
 func handler(clientset *kubernetes.Clientset) http.HandlerFunc {
@@ -40,15 +40,13 @@ func handler(clientset *kubernetes.Clientset) http.HandlerFunc {
 				http.Error(w, "Invalid JSON body", http.StatusBadRequest)
 				return
 			}
-
-			fmt.Fprintf(w, "Received namespace: %s, deployment name: %s", requestData.Namespace, requestData.DeploymentName)
-
 			err = restartDeployment(clientset, requestData.Namespace, requestData.DeploymentName)
 			if err != nil {
 				http.Error(w, "Failed to restart deployment", http.StatusInternalServerError)
 				return
 			}
-			fmt.Fprintf(w, "Deployment restarted")
+
+			fmt.Fprintf(w, "Received namespace: %s, deployment name: %s. Deployment restarted", requestData.Namespace, requestData.DeploymentName)
 		} else {
 			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		}
@@ -73,8 +71,7 @@ func restartDeployment(clientset *kubernetes.Clientset, namespace, deploymentNam
 }
 
 func main() {
-	kubeconfig := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	config, err := rest.InClusterConfig()
 	if err != nil {
 		panic(err.Error())
 	}
