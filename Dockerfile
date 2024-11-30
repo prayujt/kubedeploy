@@ -1,4 +1,4 @@
-FROM golang:1.22.5 as builder
+FROM golang:1.22.5 AS builder
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o kubedeploy main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kubedeploy main.go
 
 
 FROM alpine:latest
