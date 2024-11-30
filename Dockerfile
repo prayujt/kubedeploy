@@ -13,7 +13,7 @@ RUN go build -o kubedeploy main.go
 
 FROM alpine:latest
 
-WORKDIR /root/
+WORKDIR /root
 
 COPY --from=builder /app/kubedeploy .
 
