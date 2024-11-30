@@ -43,7 +43,6 @@ func handler(clientset *kubernetes.Clientset) http.HandlerFunc {
 			}
 			err = restartDeployment(clientset, requestData.Namespace, requestData.DeploymentName)
 			if err != nil {
-				log.Printf("Failed to restart deployment: %v", err)
 				http.Error(w, "Failed to restart deployment", http.StatusInternalServerError)
 				return
 			}
