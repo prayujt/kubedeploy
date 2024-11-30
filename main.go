@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -42,6 +43,7 @@ func handler(clientset *kubernetes.Clientset) http.HandlerFunc {
 			}
 			err = restartDeployment(clientset, requestData.Namespace, requestData.DeploymentName)
 			if err != nil {
+				log.Printf("Failed to restart deployment: %v", err)
 				http.Error(w, "Failed to restart deployment", http.StatusInternalServerError)
 				return
 			}
@@ -58,6 +60,7 @@ func restartDeployment(clientset *kubernetes.Clientset, namespace, deploymentNam
 
 	deployment, err := deploymentsClient.Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	if err != nil {
+		log.Printf("Failed to get deployment: %v", err)
 		return err
 	}
 
@@ -82,5 +85,6 @@ func main() {
 	}
 
 	http.HandleFunc("/", handler(clientset))
+	log.Println("Starting server on :8080")
 	http.ListenAndServe(":8080", nil)
 }
