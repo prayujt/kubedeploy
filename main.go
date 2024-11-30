@@ -17,6 +17,13 @@ import (
 func handler(clientset *kubernetes.Clientset) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
+			deployToken := os.Getenv("DEPLOY_TOKEN")
+			authHeader := r.Header.Get("Authorization")
+			if authHeader != "Bearer "+deployToken {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+
 			body, err := io.ReadAll(r.Body)
 			if err != nil {
 				http.Error(w, "Unable to read body", http.StatusBadRequest)
